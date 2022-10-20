@@ -34,7 +34,7 @@ void isGameOver();
 //**************************主函數******************************
 int main()
 {
-    //生成棋盤
+    //生成棋盤 test
     chessboardBuilding();
     //打印棋盤
     printChessboard();
