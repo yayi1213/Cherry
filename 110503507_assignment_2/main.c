@@ -2,9 +2,11 @@
 #include <stdbool.h>
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "stack.h"
-//#include <ev.h>
+//#include "def.h"
+int goback();
+
+#include <ev.h>
 
 #define Blue(piece) "\033[34m"#piece"\033[0m"//藍色棋子
 #define Red(piece) "\033[31m"#piece"\033[0m"//紅色棋子
@@ -15,6 +17,7 @@
 FILE *record=NULL;
 //定義外部變量,棋盤坐標
 char* chessPosition[10][10];
+char player[2]={'X','Y'};
 int b1,xi,yi;//要移動的棋子位置
 int b2,xj,yj;//移動的目標位置
 bool isStandard = 1;//是否符合規則，初始值1，符合
@@ -35,22 +38,23 @@ void blueMove();
 void rulesOfAllKindsOfChessPieces();
 //判斷遊戲結束
 void isGameOver();
-//悔棋
-//void turnBack();
 //建立檔案
 void createRecord();
 //查詢舊檔
-//void review_old_game();
+void readOldGame();
 //刪除一行
 //void deleteLine(char* FileName, int lineno);
 //void pushFunction();
+void turnBackChessPieces();
 //**************************主函數******************************
 int main()
 {
     //生成棋盤
     chessBoardBuilding();
+    
     //打印棋盤
     printChessboard();
+
 
      if ( ( record= fopen ("record.txt", "w+")) == NULL) 
     {
@@ -58,7 +62,7 @@ int main()
     }
     else
     {
-        printf("record File open successfully\n");
+        printf("Record File open successfully\n");
     }
     //開始下棋
     int turn = -1;
@@ -70,13 +74,14 @@ int main()
         switch (turn) {
             case 1:                
                 blueMove();
-                fprintf(record,"playerX -> xi:%d,yi:%d,xj:%d,yj:%d\n",xi,b1,xj,b2);
-                //printf("success");
+                fprintf(record,"player X -> xi:%d,yi:%d,xj:%d,yj:%d\n",xi,b1,xj,b2);
+
                 turn = (restart) ? (turn*-1) : turn;
                 break;
             case -1:
                 redMove();
-                fprintf(record,"playerY -> xi:%d,yi:%d,xj:%d,yj:%d\n",xi,b1,xj,b2);         
+                fprintf(record,"player Y -> xi:%d,yi:%d,xj:%d,yj:%d\n",xi,b1,xj,b2);    
+
                 turn = (restart) ? (turn*-1) : turn;
                 break;
         }
@@ -99,11 +104,86 @@ int main()
     }
     if (redWin == 0){printf("VICTORY!玩家X獲勝\n\n");}
     if (blueWin == 0){printf("GAMEOVER!玩家X輸了\n\n");}
+    readOldGame();
     
 }//主函數結束
 
 
 //*************************自定義函數*****************************
+int choose_Option()
+{
+ char option[10];
+ fflush(stdin);
+ while(1)
+ {
+  printf("choose the option(1:play/2:back to last step/3:replay):");
+  scanf(" %s", option);
+  if(strlen(option)!=1)
+  {
+   printf("wrong enter, enter again\n");
+   continue;
+  }
+  
+  if(option[0] == '1')
+  {
+   printf("continue\n");
+   return 0;
+  }
+ 
+
+  if(option[0] == '2')
+  {
+   if(goback())
+   {
+    printf("can't go back\n");
+    continue;
+   }
+   else
+   {
+    continue;
+   }
+   
+  }
+  
+//   if(option[0] == '3')
+//   {
+//    //replay();
+//    continue;
+//   }
+  }
+}
+
+int goback()
+{
+    
+    int a,b,c,d;
+    char e,f;
+    char *tmp;
+    a=pop1();b=pop2();c=pop3();d=pop4();e=pop5();f=pop6();
+    tmp=chessPosition[a][b];
+    chessPosition[a][b]=chessPosition[c][d];
+    chessPosition[c][d]=tmp;
+
+    // chessPosition[a][b]=&f;
+    // chessPosition[c][d]=&e;
+    printChessboard(); 
+    
+   // push1(c);push2(d);push3(a);push4(b);
+
+  return 0;
+}
+
+void turnBackChessPieces(){
+    int a,b,c,d;
+    a=pop1();b=pop2();c=pop3();d=pop4();
+    if (chessPosition[c][d] == Red(飛)){
+        chessPosition[a][b]=Red(飛);
+        chessPosition[c][d]=GAP;
+
+    }
+}
+    
+
 
 //生成棋盤
 void chessBoardBuilding()
@@ -182,19 +262,24 @@ int redOrBlue(int x,int y)
 //藍棋移動
 void blueMove()
 {
-    if (restart) {
+    if (restart) {   
         printf("違反遊戲規則，請重新輸入\n");
         restart = 0;
     }
+    printf("玩家X\n");
+    choose_Option();
     printf("玩家X[藍棋]請輸入你要移動的棋子:\n");
     scanf("%d %d",&xi,&b1);
-    yi=9-b1;
-    //turnBack();
+     yi=9-b1;
+
     if(redOrBlue(xi, yi) != 1){isStandard = 0;}
     
     printf("玩家X[藍棋]請輸入你要放置的位置:\n");
     scanf("%d %d",&xj,&b2);
     yj=9-b2;
+    push1(xi);push2(yi);push3(xj);push4(yj);
+    
+    //printf("堆疊彈出的為:%d %d %d %d\n",pop1(),pop2(),pop3(),pop4());
 
     rulesOfAllKindsOfChessPieces();
     printChessboard(); 
@@ -206,15 +291,20 @@ void redMove()
         printf("違反遊戲規則，請重新輸入\n");
         restart = 0;
     }
+    printf("玩家Y\n");
+    choose_Option();
     printf("玩家Y[紅棋]請輸入你要移動的棋子:\n");
     scanf("%d %d",&xi,&b1);
     yi=9-b1;
-    //turnBack();
+    
+    
+    //printf("堆疊彈出的為:%d %d %d %d\n",pop1(),pop2(),pop3(),pop4()); 
 
     if(redOrBlue(xi, yi) != -1) {isStandard = 0;}
     printf("玩家Y[紅棋]請輸入你要放置的位置:\n");
     scanf("%d %d",&xj,&b2);
     yj=9-b2;
+    push1(xi);push2(yi);push3(xj);push4(yj);
     //fprintf(boardRecord,"playerY|xi:%d,yi:%d,xj:%d,yj:%d",xi,yi,xj,yj);
     rulesOfAllKindsOfChessPieces();
     printChessboard();
@@ -241,20 +331,9 @@ void isGameOver()
     if ((sign_r == 0)||(sign_b == 0)) {
         gameOverSign = 0;
     }
+    
    
 }
-
-void pushFunction()
-    {
-    if (top >= MAX-1)/* 當堆疊已滿•則顯示錯誤 */
-        printf("\n Stack is full !\n");
-    else {
-        top++;
-        //printf("\n\n Please enter item to insert: ");
-        //fgets(old_game);
-         }
-    }
-
 //建立檔案
 void createRecord(){
     if ( ( record= fopen ("record.txt", "w+")) == NULL) 
@@ -272,53 +351,15 @@ void createRecord(){
     fclose(record);
 }
 
-// //查詢舊檔
-// void review_old_game(){
-//     char step;
-//     top=-1;
-//     change=1;
-//     if(review_old_game()){
-
-//     }
+//查詢舊檔
+void readOldGame(){
+    char step;
+    char str1[35];
+    int initRow=0,initCol=0,goalRow=0,goalCol=0,chess_index=0;
+    fscanf(record," %d %d %d %d",&xi,&b1,&xj,&b2);
 
 
-// }
-
-// //刪除一行
-// void deleteLine(char* FileName, int lineno)  
-// {  
-//    int   Lid=0;   
-//    FILE*   fp=NULL;  
-//    char   Buf[256]="";  
-//    char   tmp[20][256]={0};  
-//    char   *p   =   Buf;    
-   
-//       if ((fp = fopen(*record, "r+")) == NULL)  
-//    {  
-//     printf("Can't   open   file!/n");  
-//     return;  
-//    } 
-
-//    while ((p = fgets(Buf, 256, fp)) != NULL)  
-//    {  
-//      Lid++;  
-//      if (Lid == lineno)  
-//      {  
-//       if ((p = fgets(Buf, 256, fp)) != NULL) 
-//       {  
-//       strcpy(tmp[Lid], Buf);  
-//      }  
-//       }  
-//     else  
-//     {
-//       strcpy(tmp[Lid], Buf);
-//      }
-//  } 
-
-// //悔棋
-// void turnBack(){
-//     if(xi=0){deleteLine(fp,index);}
-// }
+}
 
 //每種棋子的規則
 void rulesOfAllKindsOfChessPieces()
@@ -354,7 +395,10 @@ void rulesOfAllKindsOfChessPieces()
         {
             
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Red(飛);
+            push6(chessPosition[xj][yj]);
+    
             return;
         }
         else
@@ -395,7 +439,9 @@ void rulesOfAllKindsOfChessPieces()
         if ((xi == xj || yi == yj)&& isStandard && redOrBlue(xj, yj) != 1)//如果棋子直行、沒有犯規且落點不是紅棋，可以移動
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Blue(飛);
+            push6(chessPosition[xj][yj]);
             return;
         }
         else
@@ -411,7 +457,9 @@ void rulesOfAllKindsOfChessPieces()
         if ((redOrBlue(xj, yj) != -1) && isStandard && ((xj == xi+2&& yj == yi-1) || (xj == xi+2 && yj == yi+1 )))
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Red(桂);
+            push6(chessPosition[xj][yj]);
             return;
         }
         else
@@ -426,7 +474,9 @@ void rulesOfAllKindsOfChessPieces()
         
         if ((redOrBlue(xj, yj) != 1) && isStandard && ((xj == xi-2 && yj == yi-1)||(xj == xi-2 && yj == yi+1)))
             {chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Blue(桂);
+            push6(chessPosition[xj][yj]);
             return;
         }
         else
@@ -489,7 +539,9 @@ void rulesOfAllKindsOfChessPieces()
         {
             
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Red(角);
+            push6(chessPosition[xj][yj]);
             return;
         }
         else
@@ -550,7 +602,9 @@ if (chessPosition[xi][yi] == Blue(角))
         {
             
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Blue(角);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -567,7 +621,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if ( isStandard && redOrBlue(xj, yj) != -1&&(xj == xi+1&& yj == yi))//
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Red (步);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -584,7 +640,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if (isStandard && redOrBlue(xj, yj) != 1&&(xj == xi-1&& yj == yi))//
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Blue(步);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -599,7 +657,9 @@ if (chessPosition[xi][yi] == Blue(角))
         {
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Red(銀);
+            push6(chessPosition[xj][yj]);
         }
         }
         else
@@ -614,7 +674,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if ((redOrBlue(xj, yj) != 1) && ((xj == xi-1 && yj == yi-1 ) || (xj == xi-1 && yj == yi+1) || (xj == xi-1 && yj == yi ) || (xj == xi+1 && yj == yi-1) ||(xj== xi+1&&yj==yi+1)))
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Blue(銀);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -628,7 +690,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if ((redOrBlue(xj, yj) != -1) && ((xj == xi+1 && yj == yi-1 ) || (xj == xi+1 && yj == yi+1) || (xj == xi+1 && yj == yi ) || (xj == xi-1 && yj == yi) ||(xj== xi&&yj==yi-1)||(xj== xi&&yj==yi+1)))
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Red(金);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -642,7 +706,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if ((redOrBlue(xj, yj) != 1) && ((xj == xi-1 && yj == yi-1 ) || (xj == xi-1 && yj == yi+1) || (xj == xi-1 && yj == yi ) || (xj == xi+1 && yj == yi) ||(xj== xi&&yj==yi-1)||(xj== xi&&yj==yi+1)))
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Blue(金);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -666,7 +732,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if ((yi == yj)&& isStandard && (redOrBlue(xj, yj)!= -1))
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Red (香);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -692,7 +760,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if ((yi == yj)&& isStandard&& (redOrBlue(xj, yj)!= 1))//
         {         
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Blue(香);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -707,7 +777,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if ((redOrBlue(xj, yj) != -1) && ((xj == xi-1 && yj == yi-1 ) || (xj == xi-1 && yj == yi+1) || (xj == xi-1 && yj == yi ) ||(xj == xi+1 && yj == yi) ||(xj== xi+1&&yj==yi+1)|| (xj == xi+1 && yj == yi-1) ||(xj== xi&&yj==yi+1)||(xj== xi&&yj==yi-1)))
         {
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Red(王);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -721,7 +793,9 @@ if (chessPosition[xi][yi] == Blue(角))
         if ((redOrBlue(xj, yj) != 1) && ((xj == xi-1 && yj == yi-1 ) || (xj == xi-1 && yj == yi+1) || (xj == xi-1 && yj == yi ) ||(xj == xi+1 && yj == yi) ||(xj== xi+1&&yj==yi+1)|| (xj == xi+1 && yj == yi-1) ||(xj== xi&&yj==yi+1)||(xj== xi&&yj==yi-1)))
         {  
             chessPosition[xi][yi] = GAP;
+            push5(chessPosition[xi][yi]);
             chessPosition[xj][yj] = Blue(王);
+            push6(chessPosition[xj][yj]);
         }
         else
         {
@@ -733,3 +807,109 @@ if (chessPosition[xi][yi] == Blue(角))
             restart = 1;
         }
 }
+
+ void push1(int data1){
+	if(top1>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top1++;
+		initRow[top1]=data1;
+	}
+} 
+/*從堆疊取出資料*/
+int pop1(){
+	int data1;
+		data1=initRow[top1];
+		top1--;
+		return data1; 
+}
+/*將資料放入堆疊*/
+void push2(int data2){
+	if(top2>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top2++;
+		initCol[top2]=data2;
+	}
+} 
+/*從堆疊取出資料*/
+int pop2(){
+	int data2;
+		data2=initCol[top2];
+		top2--;
+		return data2; 
+}
+/*將資料放入堆疊*/
+void push3(int data3){
+	if(top3>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top3++;
+		goalRow[top3]=data3;
+	}
+} 
+/*從堆疊取出資料*/
+int pop3(){
+	int data3;
+		data3=goalRow[top3];
+		top3--;
+		return data3; 
+}
+/*將資料放入堆疊*/
+void push4(int data4){
+	if(top4>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top4++;
+		goalCol[top4]=data4;
+	}
+} 
+/*從堆疊取出資料*/
+int pop4(){
+	int data4;
+		data4=goalCol[top4];
+		top4--;
+		return data4; 
+}
+/*將資料放入堆疊*/
+void push5(char data5[100])
+{if(top5>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top5++;
+		strcpy(initPlace[top5],data5);
+	}
+} 
+/*從堆疊取出資料*/
+char pop5()
+{char data5;
+        data5=goalCol[top5];
+		//data5=goalPlace[top5];
+		top5--;
+		return data5; 
+}
+/*將資料放入堆疊*/
+void push6(char data6[])
+{if(top6>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top6++;
+		strcpy(initPlace[top6],data6);
+	}
+} 
+/*從堆疊取出資料*/
+char pop6()
+{char data6;
+        data6=goalCol[top6];
+		//data6=goalPlace[top6];
+		top6--;
+		return data6; 
+}
+/*判斷是否為空堆疊*/
+int isEmpty(){
+	if(top1==-1){
+		return 1; 
+	}else{
+		return 0;
+	}
+} 

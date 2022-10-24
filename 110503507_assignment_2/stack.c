@@ -1,76 +1,108 @@
-#include"stack.h"
-#include<stdio.h>
-#define MAX 400
-
-// void pushFunction(void);/*新增函數*/
-// void popFunction(void);/*刪除函數*/
-// void listFunction (void); /*翰出函數*/
-// char item[MAX][20];
-// int top=-1;/*top的起始值為-1*/
-int main(){
-char option;
-while (1) {
-printf("\n******************************\n");
-printf("       <1> insert (push) \n");
-printf("       <0> delete (pop) \n") ;
-// printf("       <3> list \n");
-// printf("       <4> quit\n");
-printf("******************************\n");
-printf(" Please enter your choice...");
-option = getchar();
-while (getchar()!='\n')
-continue;
-    switch(option) {
-    case'1':
-    pushFunction();
-    break;
-    case'0':
-    popFunction();
-    break;
-    // case'3':
-    // listFunction();
-    // break;
-    // case '4':
-    printf("\n");
-    return 0;
-        }
-    }
+#include <stdio.h>
+#include <stdlib.h>
+#include "stack.h"
+/*將資料放入堆疊*/
+ void push1(int data1){
+	if(top1>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top1++;
+		initRow[top1]=data1;
+	}
+} 
+/*從堆疊取出資料*/
+int pop1(){
+	int data1;
+		data1=initRow[top1];
+		top1--;
+		return data1; 
 }
-    void pushFunction(void)
-    {
-    if (top >= MAX-1)/* 當堆疊已滿•則顯示錯誤 */
-        printf("\n Stack is full !\n");
-    else {
-        top++;
-        //printf("\n\n Please enter item to insert: ");
-        fgets(item[top]);
-         }
-    }
+/*將資料放入堆疊*/
+void push2(int data2){
+	if(top2>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top2++;
+		initCol[top2]=data2;
+	}
+} 
+/*從堆疊取出資料*/
+int pop2(){
+	int data2;
+		data2=initCol[top2];
+		top2--;
+		return data2; 
+}
+/*將資料放入堆疊*/
+void push3(int data3){
+	if(top3>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top3++;
+		goalRow[top3]=data3;
+	}
+} 
+/*從堆疊取出資料*/
+int pop3(){
+	int data3;
+		data3=goalRow[top3];
+		top3--;
+		return data3; 
+}
+/*將資料放入堆疊*/
+void push4(int data4){
+	if(top4>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top4++;
+		goalCol[top4]=data4;
+	}
+} 
+/*從堆疊取出資料*/
+int pop4(){
+	int data4;
+		data4=goalCol[top4];
+		top4--;
+		return data4; 
+}
 
-    void popFunction(void)
-    {
-    if (top < 0)/*當堆疊没有資料存在，則顯示錯誤 */
-        printf("\n\n No item, stack is empty ! \n");
-    else {
-        printf(" \n\n Item %s deleted\n", item[top]);
-        top--;
-    }
-    }
-
-    void listFunction(void)
-    {
-        int count = 0,i;
-    if(top < 0)
-        printf("\n\n No item, Stack is empty");
-    else{
-        printf("\n\n ITEM");    
-        printf("-------------------\n");
-        for(i=0;i<=top;i++){
-            printf(" %-20s\n ",item[i]);
-            count++;
-        }
-        printf("-------------------\n");
-        printf("TOTAL item:%d\n",count);
-        }   
-    }
-
+/*將資料放入堆疊*/
+void push5(char data5)
+{if(top5>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top5++;
+		initplace[top5]=data5;
+	}
+} 
+/*從堆疊取出資料*/
+char pop5()
+{char data5;
+		data5=goalCol[top5];
+		top5--;
+		return data5; 
+}
+/*將資料放入堆疊*/
+void push6(char data6)
+{if(top6>=MAXSTACK){
+		printf("堆疊已滿,無法再加入\n");	
+	}else{
+		top6++;
+		initplace[top6]=data6;
+	}
+} 
+/*從堆疊取出資料*/
+char pop6()
+{char data6;
+		data6=goalCol[top6];
+		top6--;
+		return data6; 
+}
+/*判斷是否為空堆疊*/
+int isEmpty(){
+	if(top1==-1){
+		return 1; 
+	}else{
+		return 0;
+	}
+} 
