@@ -150,7 +150,7 @@ int goback()
     tmp=wpop();
     chessPosition[a][b]=chessPosition[c][d];
     chessPosition[c][d]=tmp;
-    deleteRecord(record);
+    //deleteRecord(record);
     printChessboard(); 
     return 0;
     }
