@@ -1,4 +1,4 @@
-## Shogi program 
+### Shogi program 
 This is assignment 2
 
 ## Compile & Run
