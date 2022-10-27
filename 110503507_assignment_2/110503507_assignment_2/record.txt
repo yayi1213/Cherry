@@ -1,4 +1,0 @@
-player X -> xi:7,yi:2,xj:6,yj:2,goalplace:[34m步[0m
-player Y -> xi:3,yi:6,xj:4,yj:6,goalplace:[31m步[0m
-player X -> xi:8,yi:1,xj:2,yj:7,goalplace:[34m角[0m
-player Y -> xi:1,yi:8,xj:2,yj:8,goalplace:[31m香[0m
