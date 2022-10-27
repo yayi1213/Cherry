@@ -97,11 +97,7 @@ int choose_Option()
   printf("choose the option(1:play/0:back to last step/s:save the record): ");
   count++;
   scanf(" %s", option);
-//   if(strlen(option)!=1)
-//   {
-//    printf("wrong enter, enter again\n");
-//    continue;
-//   }
+
   if(option[0] == '1')//輸入1,下棋
   {
    printf("continue\n");
