@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <ctype.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include <math.h>
 #include <stdlib.h>
@@ -7,7 +9,7 @@
 #include <ev.h>
 
 FILE *record=NULL;//檔案名稱
-FILE *s_record=NULL;
+//FILE *s_record=NULL;
 //定義外部變量,棋盤坐標
 char* chessPosition[10][10];
 int b1,xi,yi;//要移動的棋子位置
@@ -35,11 +37,15 @@ void isGameOver();
 void createRecord();
 //查詢舊檔
 void readOldGame();
+//讀取舊檔
+void reviesOldGame();
 //存取目前資料
 void saveRecord();
 //刪除資料
 void deleteRecord(FILE *fptr);
+
 //**************************主函數******************************
+
 int main()
 {
     //生成棋盤
@@ -81,27 +87,26 @@ int main()
     }
     if (redWin == 0){printf("VICTORY!玩家X獲勝\n\n");}
     if (blueWin == 0){printf("GAMEOVER!玩家X輸了\n\n");}
-    readOldGame();
+    //readOldGame();
     
 }//主函數結束
 
 
 //*************************自定義函數*****************************
 /*選擇進行之動作*/
-int choose_Option()
+void choose_Option1()
 {
  char option[10];
  fflush(stdin);
  while(1)
  {
-  printf("choose the option(1:play/0:back to last step/s:save the record): ");
+  printf("玩家X\nchoose the option(1:play/0:back to last step/s:save the record): ");
   count++;
   scanf(" %s", option);
-
   if(option[0] == '1')//輸入1,下棋
   {
    printf("continue\n");
-   return 0;
+   return ;
   }
  
   if(option[0] == '0')//輸入0,悔棋
@@ -109,15 +114,13 @@ int choose_Option()
     
    if(goback())
    {
+    //count--;
     printf("can't go back\n");
     continue;
    }
    else
    {
-    if(count%2==0){
-        printf("玩家Y\n");}
-    if(count%2!=0){
-        printf("玩家X\n");}
+    redMove();
    continue;
    }
   }
@@ -128,8 +131,47 @@ int choose_Option()
         continue;
     }
   }
+  
 }
-
+void choose_Option2()
+{
+ char option[10];
+ fflush(stdin);
+ while(1)
+ {
+  printf("玩家Y\nchoose the option(1:play/0:back to last step/s:save the record): ");
+  count++;
+  scanf(" %s", option);
+  if(option[0] == '1')//輸入1,下棋
+  {
+   printf("continue\n");
+   return ;
+  }
+ 
+  if(option[0] == '0')//輸入0,悔棋
+  {
+    
+   if(goback())
+   {
+    //count--;
+    printf("can't go back\n");
+    continue;
+   }
+   else
+   {
+    blueMove();
+   continue;
+   }
+  }
+  
+    if(option[0] =='s')//輸入s,存取資料
+    {
+        saveRecord();
+        continue;
+    }
+  }
+  
+}
 
 /*悔棋*/
 int goback()
@@ -160,8 +202,10 @@ void saveRecord(){
 }
 
 void deleteRecord(FILE *fptr){
+    char null[]="";
     fseek(fptr,-55, SEEK_CUR );
-    fwrite(fptr,-55,1,fptr);
+    fwrite(null ,-55,SEEK_CUR,fptr);
+    
 }
 //生成棋盤
 void chessBoardBuilding()
@@ -244,8 +288,8 @@ void blueMove()
         printf("違反遊戲規則，請重新輸入\n");
         restart = 0;
     }
-    printf("玩家X\n");
-    choose_Option();
+    //printf("玩家X\n");
+    choose_Option1() ;
     printf("玩家X[藍棋]請輸入你要移動的棋子:\n");
     scanf("%d %d",&xi,&b1);
      yi=9-b1;
@@ -266,8 +310,9 @@ void redMove()
         printf("違反遊戲規則，請重新輸入\n");
         restart = 0;
     }
-    printf("玩家Y\n");
-    choose_Option();
+    //printf("玩家Y\n");
+    //printf("玩家Y %d",choose_Option()) ;
+    choose_Option2();
     printf("玩家Y[紅棋]請輸入你要移動的棋子:\n");
     scanf("%d %d",&xi,&b1);
     yi=9-b1;
@@ -319,12 +364,18 @@ void createRecord(){
 //查詢舊檔
 void readOldGame(){
     char step;
-    char str1[35];
+    char str1[55];
     int initRow=0,initCol=0,goalRow=0,goalCol=0,chess_index=0;
-    fscanf(record," %d %d %d %d",&xi,&yi,&xj,&yj);
-    
+    fscanf(record," %d %d %d %d %s",&xi,&yi,&xj,&yj,chessPosition[xj][yj]);
+    fclose(record);
+    reviesOldGame();
 }
-
+void reviesOldGame(){
+    char step;
+    turn=1;
+    printf("複盤結束\n");
+    exit(0);
+}
 //每種棋子的規則
 void rulesOfAllKindsOfChessPieces()
 {
