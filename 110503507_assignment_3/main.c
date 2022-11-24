@@ -37,7 +37,7 @@ void createRecord();
 //查詢舊檔
 void readOldGame();
 //讀取舊檔
-void reviesOldGame();
+void reviewOldGame();
 //存取目前資料
 void saveRecord();
 //刪除資料
@@ -473,7 +473,7 @@ void readOldGame(){
     int initRow=0,initCol=0,goalRow=0,goalCol=0,chess_index=0;
     fscanf(record," %d %d %d %d %s",&xi,&yi,&xj,&yj,chessPosition[xj][yj]);
     fclose(record);
-    //reviesOldGame();
+    reviewOldGame();
 }
 
 //每種棋子的規則
@@ -920,4 +920,11 @@ if (chessPosition[xi][yi] == Blue(角))
         {
             restart = 1;
         }
+}
+
+void reviewOldGame(){
+    char step;
+    turn=1;
+    printf("複盤結束\n");
+    exit(0);
 }
